@@ -442,6 +442,42 @@ with tab2:
         key="bulk_uploader"
     )
 
+    # ── Sample Data ───────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="margin-top:1.4rem">
+      <div class="sec-tag">Sample Data</div>
+      <div class="sec-title">📥 Try it with Sample Data</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="bulk-info" style="margin-bottom:.9rem">
+      Not sure about the format? Download this ready-to-use <strong>Excel file with 5 sample applicants</strong>
+      — upload it above to see the bulk scanner in action instantly.
+    </div>
+    """, unsafe_allow_html=True)
+
+    _sample_df = pd.DataFrame({
+        "GRE Score":         [337, 316, 322, 295, 311],
+        "TOEFL Score":       [118, 104, 110,  97, 107],
+        "University Rating": [  4,   3,   4,   2,   3],
+        "SOP":               [4.5, 3.0, 4.0, 2.5, 3.5],
+        "LOR ":              [4.5, 3.5, 4.0, 3.0, 3.0],
+        "CGPA":              [9.65, 8.00, 8.67, 7.10, 8.30],
+        "Research":          [  1,   1,   1,   0,   1],
+    })
+    _sample_buf = io.BytesIO()
+    with pd.ExcelWriter(_sample_buf, engine="openpyxl") as _writer:
+        _sample_df.to_excel(_writer, index=False, sheet_name="Applicants")
+    st.download_button(
+        label="⬇️ Download Sample Excel (5 applicants)",
+        data=_sample_buf.getvalue(),
+        file_name="admitiq_sample_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+        key="sample_dl"
+    )
+    st.markdown('<hr class="fdivider" style="margin:1.6rem 0">', unsafe_allow_html=True)
+
     if uploaded is not None:
         raw_df, err = load_file(uploaded)
 
