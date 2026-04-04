@@ -11,7 +11,7 @@ import os
 
 # ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="AdmitIQ — Admission Predictor",
+    page_title="EnrollSmart — Admission Predictor",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="collapsed"
