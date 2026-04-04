@@ -103,7 +103,7 @@ PL = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
 st.markdown("""
 <div class="hero">
   <div class="tag">AI-Powered · Graduate Admissions</div>
-  <div class="hero-title">AdmitIQ</div>
+  <div class="hero-title">EnrollSmart</div>
   <div class="hero-sub">Move any slider — your chances update instantly. No button needed.</div>
 </div>
 """, unsafe_allow_html=True)
