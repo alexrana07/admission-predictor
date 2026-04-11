@@ -9,7 +9,7 @@ import sqlite3
 import tempfile
 import os
 
-# Page Config 
+# ─── Page Config ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="EnrollSmart — Admission Predictor",
     page_icon="🎓",
@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# CSS Injection 
+# ─── CSS Injection ────────────────────────────────────────────────────────────
 _CSS = """
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -75,7 +75,7 @@ try:
 except AttributeError:
     st.markdown(_CSS, unsafe_allow_html=True)
 
-# Data & Model 
+# ─── Data & Model ─────────────────────────────────────────────────────────────
 @st.cache_resource
 def setup():
     df = pd.read_csv("Admission_Predict.csv")
@@ -99,7 +99,7 @@ def badge(val, col):
 PL = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
           font=dict(family="DM Sans", color="#94a3b8"))
 
-# Hero 
+# ─── Hero ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="hero">
   <div class="tag">AI-Powered · Graduate Admissions</div>
@@ -109,12 +109,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 st.markdown('<hr class="fdivider">', unsafe_allow_html=True)
 
-
+# ─── Tabs ─────────────────────────────────────────────────────────────────────
 tab1, tab2 = st.tabs(["🎓 Single Predictor", "📂 Bulk Scanner"])
 
-
+# ══════════════════════════════════════════════════════════════════════════════
 # TAB 1 — Single Predictor
-
+# ══════════════════════════════════════════════════════════════════════════════
 with tab1:
 
     colA, colB = st.columns(2, gap="large")
@@ -323,9 +323,9 @@ with tab1:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-
+# ══════════════════════════════════════════════════════════════════════════════
 # TAB 2 — Bulk Scanner
-
+# ══════════════════════════════════════════════════════════════════════════════
 with tab2:
 
     EXPECTED_COLS = list(X.columns)
@@ -357,11 +357,11 @@ with tab2:
         """Load CSV / Excel / JSON / SQLite into a DataFrame. Returns (df, error)."""
         name = uploaded_file.name.lower()
         try:
-            # CSV 
+            # ── CSV ──────────────────────────────────────────────────────────
             if name.endswith(".csv"):
                 return pd.read_csv(uploaded_file), None
 
-            # Excel 
+            # ── Excel ────────────────────────────────────────────────────────
             elif name.endswith((".xlsx", ".xls")):
                 xf = pd.ExcelFile(uploaded_file)
                 sheet = (
@@ -370,7 +370,7 @@ with tab2:
                 )
                 return pd.read_excel(uploaded_file, sheet_name=sheet), None
 
-            # JSON 
+            # ── JSON ─────────────────────────────────────────────────────────
             elif name.endswith(".json"):
                 raw = pd.read_json(uploaded_file)
                 # Flatten one nesting level if values are dicts
@@ -378,7 +378,7 @@ with tab2:
                     raw = pd.json_normalize(raw.to_dict(orient="records"))
                 return raw, None
 
-            # SQLite / .db / .sql 
+            # ── SQLite / .db / .sql ──────────────────────────────────────────
             elif name.endswith((".db", ".sqlite", ".sql")):
                 with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
                     tmp.write(uploaded_file.read())
@@ -413,7 +413,7 @@ with tab2:
         elif p >= 50: return "🟡 Good"
         else:         return "🔴 Needs Work"
 
-    #  UI 
+    # ── UI ────────────────────────────────────────────────────────────────────
     st.markdown(
         '<div class="sec-tag">Bulk Scanner</div>'
         '<div class="sec-title">📂 Upload a file — scan &amp; predict all applicants at once</div>',
@@ -442,6 +442,42 @@ with tab2:
         key="bulk_uploader"
     )
 
+    # ── Sample Data ───────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="margin-top:1.4rem">
+      <div class="sec-tag">Sample Data</div>
+      <div class="sec-title">📥 Try it with Sample Data</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="bulk-info" style="margin-bottom:.9rem">
+      Not sure about the format? Download this ready-to-use <strong>Excel file with 5 sample applicants</strong>
+      — upload it above to see the bulk scanner in action instantly.
+    </div>
+    """, unsafe_allow_html=True)
+
+    _sample_df = pd.DataFrame({
+        "GRE Score":         [337, 316, 322, 295, 311],
+        "TOEFL Score":       [118, 104, 110,  97, 107],
+        "University Rating": [  4,   3,   4,   2,   3],
+        "SOP":               [4.5, 3.0, 4.0, 2.5, 3.5],
+        "LOR ":              [4.5, 3.5, 4.0, 3.0, 3.0],
+        "CGPA":              [9.65, 8.00, 8.67, 7.10, 8.30],
+        "Research":          [  1,   1,   1,   0,   1],
+    })
+    _sample_buf = io.BytesIO()
+    with pd.ExcelWriter(_sample_buf, engine="openpyxl") as _writer:
+        _sample_df.to_excel(_writer, index=False, sheet_name="Applicants")
+    st.download_button(
+        label="⬇️ Download Sample Excel (5 applicants)",
+        data=_sample_buf.getvalue(),
+        file_name="admitiq_sample_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True,
+        key="sample_dl"
+    )
+    st.markdown('<hr class="fdivider" style="margin:1.6rem 0">', unsafe_allow_html=True)
+
     if uploaded is not None:
         raw_df, err = load_file(uploaded)
 
@@ -460,7 +496,7 @@ with tab2:
             with st.expander("👁️ Preview raw data (first 5 rows)"):
                 st.dataframe(raw_df.head(), use_container_width=True)
 
-            # Column mapping 
+            # ── Column mapping ─────────────────────────────────────────────
             auto_map = auto_map_columns(raw_df.columns.tolist())
             missing  = [c for c in EXPECTED_COLS if c not in auto_map]
             final_map = dict(auto_map)
@@ -490,7 +526,7 @@ with tab2:
                     hide_index=True
                 )
 
-            # ── Run predictions
+            # ── Run predictions ────────────────────────────────────────────
             still_missing = [c for c in EXPECTED_COLS if c not in final_map]
             if still_missing:
                 st.error(f"❌ Still missing: {still_missing}. Cannot predict without all columns.")
@@ -524,7 +560,7 @@ with tab2:
                         unsafe_allow_html=True
                     )
 
-                    #  Summary stat cards
+                    # ── Summary stat cards ─────────────────────────────────
                     n_exc = int((chances >= 75).sum())
                     n_gd  = int(((chances >= 50) & (chances < 75)).sum())
                     n_low = int((chances < 50).sum())
@@ -538,7 +574,7 @@ with tab2:
 
                     st.write("")
 
-                    # Distribution chart 
+                    # ── Distribution chart ─────────────────────────────────
                     st.markdown('<div class="cwrap">', unsafe_allow_html=True)
                     st.markdown('<div class="sec-tag">Distribution</div><div class="sec-title">📊 Predicted Chance Distribution</div>', unsafe_allow_html=True)
                     fig_bulk = go.Figure()
@@ -558,7 +594,7 @@ with tab2:
 
                     st.markdown('<hr class="fdivider">', unsafe_allow_html=True)
 
-                    # Filter + sort controls 
+                    # ── Filter + sort controls ─────────────────────────────
                     st.markdown('<div class="sec-tag" style="margin-bottom:.5rem">Individual Results</div>', unsafe_allow_html=True)
                     fc1, fc2, fc3 = st.columns([2, 1, 1])
                     with fc1:
@@ -610,7 +646,7 @@ with tab2:
 
                     page_df = display_df.iloc[page_idx * per_page : (page_idx + 1) * per_page]
 
-                    # Helper: build tip list for one row 
+                    # ── Helper: build tip list for one row ─────────────────
                     def row_tips(row):
                         tips = []
                         if row["GRE Score"]         < col_stats["GRE Score"]["p66"]:   tips.append("📖 Raise <strong>GRE ≥ 320</strong> to reach the top third.")
@@ -620,7 +656,7 @@ with tab2:
                         if row["SOP"]                < col_stats["SOP"]["p66"]:         tips.append("✍️ A polished <strong>SOP</strong> can compensate for weaker scores.")
                         return tips[:3]
 
-                    # Render cards: 2 per row 
+                    # ── Render cards: 2 per row ────────────────────────────
                     rows_iter = list(page_df.iterrows())
                     for pair_start in range(0, len(rows_iter), 2):
                         pair = rows_iter[pair_start : pair_start + 2]
@@ -705,7 +741,7 @@ with tab2:
 
                                 st.markdown('<hr class="fdivider" style="margin:1.2rem 0">', unsafe_allow_html=True)
 
-                    # Download buttons 
+                    # ── Download buttons ───────────────────────────────────
                     dl1, dl2 = st.columns(2)
                     with dl1:
                         st.download_button(
@@ -731,7 +767,7 @@ with tab2:
                             use_container_width=True
                         )
 
-# Footer 
+# ─── Footer ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="footer">AdmitIQ · Streamlit + Plotly · Scikit-learn Linear Regression<br>
 <span style="color:#0f172a">© 2024 · For academic use only</span></div>
